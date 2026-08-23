@@ -1,0 +1,28 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`PaymentProcessor > processPayment > returns success result for valid intent 1`] = `
+{
+  "amount": 10800,
+  "chargeId": "ch_test_abc123",
+  "status": "success",
+}
+`;
+
+exports[`PaymentProcessor > processPayment > rejects high-fraud-score payments 1`] = `
+{
+  "amount": 0,
+  "fraudScore": 0.95,
+  "reason": "fraud_detected",
+  "status": "rejected",
+}
+`;
+
+exports[`FraudDetector > score > assigns high score for high-risk country 1`] = `0.4`;
+
+exports[`SubscriptionManager > charge > issues invoice for active subscription 1`] = `
+{
+  "amount": 2999,
+  "chargeId": "ch_invoice_stub",
+  "status": "success",
+}
+`;
