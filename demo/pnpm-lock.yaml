@@ -1,0 +1,44 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      stripe:
+        specifier: ^14.21.0
+        version: 14.21.0
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
+    devDependencies:
+      typescript:
+        specifier: ^5.4.5
+        version: 5.4.5
+
+packages:
+
+  stripe@14.21.0:
+    resolution: {integrity: sha512-xK2e3mB7dP1f2eR4vVoxmEC4GBinm9hSJbXp5nVmVQc9n7vGrT1G3fSFk3lR3wDU8LDHL4nv1/GBh+hZ7nGQ==}
+    engines: {node: '>=12.*'}
+
+  zod@3.22.4:
+    resolution: {integrity: sha512-iC+8Io04lddc+h8RxQNFm3eUlMY1Ny/YR3r3g7iy+AkKyIp3J7F8rHPLwlXHmMfY88GxNHJJd7nKLtH4Kfnw==}
+
+  typescript@5.4.5:
+    resolution: {integrity: sha512-vcI5BVdLMOJHNBWo5p0n2KQ3S9uCxKBB3vbdyBVk8klq1i4M2PoJmb0xJVNAJGGYkuJLNhJbLnpCTOzNtNTWQ==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
+snapshots:
+
+  stripe@14.21.0:
+    dependencies:
+      '@types/node': 20.14.2
+
+  zod@3.22.4: {}
+
+  typescript@5.4.5: {}
