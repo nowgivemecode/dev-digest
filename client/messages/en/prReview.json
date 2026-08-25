@@ -121,5 +121,13 @@
     "inScopeLabel": "In scope",
     "outOfScopeLabel": "Out of scope",
     "error": "Could not load intent. Click Recompute to try again."
+  },
+  "blastRadius": {
+    "title": "Blast Radius",
+    "loadingTitle": "Computing blast radius…",
+    "emptyTitle": "No blast radius data",
+    "emptyBody": "Index not yet available for this repository.",
+    "degradedBanner": "Partial data — index is incomplete.",
+    "error": "Failed to load blast radius."
   }
 }
