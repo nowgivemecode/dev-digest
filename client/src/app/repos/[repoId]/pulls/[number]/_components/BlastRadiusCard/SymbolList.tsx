@@ -1,17 +1,16 @@
 "use client";
 
 import React from "react";
-import { useParams } from "next/navigation";
+import { githubBlobUrl } from "@/lib/utils/githubUrls";
 import type { SymbolRow } from "./helpers";
 
 interface SymbolListProps {
   rows: SymbolRow[];
+  repoFullName: string | null;
+  headSha: string | null;
 }
 
-export function SymbolList({ rows }: SymbolListProps) {
-  const params = useParams<{ repoId: string }>();
-  const repoId = params?.repoId ?? "";
-
+export function SymbolList({ rows, repoFullName, headSha }: SymbolListProps) {
   if (rows.length === 0) {
     return (
       <p style={{ fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
@@ -44,21 +43,30 @@ export function SymbolList({ rows }: SymbolListProps) {
           {sym.callers.length > 0 && (
             <ul style={{ listStyle: "none", margin: "0 0 0 16px", padding: 0, display: "flex", flexDirection: "column", gap: 2 }}>
               {sym.callers.map((c) => {
-                const href = `https://github.com/${repoId}/blob/HEAD/${c.file}#L${c.line}`;
+                const href =
+                  repoFullName && headSha
+                    ? githubBlobUrl(repoFullName, headSha, c.file, c.line)
+                    : null;
                 return (
                   <li key={`${c.file}:${c.line}`} style={{ fontSize: 12, color: "var(--text-secondary)" }}>
-                    <a
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        color: "var(--accent, #2563eb)",
-                        textDecoration: "none",
-                        fontFamily: "var(--font-mono, monospace)",
-                      }}
-                    >
-                      {c.file}:{c.line}
-                    </a>
+                    {href ? (
+                      <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          color: "var(--accent, #2563eb)",
+                          textDecoration: "none",
+                          fontFamily: "var(--font-mono, monospace)",
+                        }}
+                      >
+                        {c.file}:{c.line}
+                      </a>
+                    ) : (
+                      <span style={{ fontFamily: "var(--font-mono, monospace)" }}>
+                        {c.file}:{c.line}
+                      </span>
+                    )}
                   </li>
                 );
               })}

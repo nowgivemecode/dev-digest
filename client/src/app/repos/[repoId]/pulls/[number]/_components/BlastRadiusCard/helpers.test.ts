@@ -43,6 +43,32 @@ describe("buildSymbolRows", () => {
     });
   });
 
+  it("excludes callers from the declaration file (same file as symbol)", () => {
+    const blast = makeBlast({
+      changedSymbols: [{ name: "fn", kind: "function", file: "src/fn.ts" }],
+      callers: [
+        { symbol: "fn", file: "src/fn.ts", line: 1 },   // same file — should be excluded
+        { symbol: "fn", file: "src/other.ts", line: 5 }, // different file — kept
+      ],
+    });
+    const rows = buildSymbolRows(blast);
+    expect(rows[0]?.callers).toHaveLength(1);
+    expect(rows[0]?.callers[0]?.file).toBe("src/other.ts");
+  });
+
+  it("sorts callers by rank ascending", () => {
+    const blast = makeBlast({
+      changedSymbols: [{ name: "fn", kind: "function", file: "src/fn.ts" }],
+      callers: [
+        { symbol: "fn", file: "src/c.ts", line: 1, rank: 3 },
+        { symbol: "fn", file: "src/a.ts", line: 1, rank: 1 },
+        { symbol: "fn", file: "src/b.ts", line: 1, rank: 2 },
+      ],
+    });
+    const rows = buildSymbolRows(blast);
+    expect(rows[0]?.callers.map((c) => c.file)).toEqual(["src/a.ts", "src/b.ts", "src/c.ts"]);
+  });
+
   it("limits callers to 20", () => {
     const callers = Array.from({ length: 30 }, (_, i) => ({
       symbol: "bigFn",

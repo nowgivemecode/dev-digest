@@ -13,7 +13,8 @@ export function buildSymbolRows(blast: BlastRadiusResult): SymbolRow[] {
     kind: sym.kind,
     file: sym.file,
     callers: blast.callers
-      .filter((c) => c.symbol === sym.name)
+      .filter((c) => c.symbol === sym.name && c.file !== sym.file)
+      .sort((a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity))
       .slice(0, 20),
   }));
 }

@@ -11,6 +11,8 @@ import { BlastRadiusCard } from "../BlastRadiusCard";
 interface OverviewTabProps {
   prBody: string | null | undefined;
   prId: string | null;
+  repoFullName?: string | null;
+  headSha?: string | null;
 }
 
 // Simple error boundary so a blast-radius failure doesn't crash the whole tab.
@@ -33,12 +35,12 @@ class BlastRadiusErrorBoundary extends Component<{ children: React.ReactNode }, 
   }
 }
 
-function BlastRadiusSection({ prId }: { prId: string }) {
+function BlastRadiusSection({ prId, repoFullName, headSha }: { prId: string; repoFullName?: string | null; headSha?: string | null }) {
   const { data: blastRadius, isLoading: blastLoading } = useBlastRadius(prId);
-  return <BlastRadiusCard blastRadius={blastRadius} isLoading={blastLoading} />;
+  return <BlastRadiusCard blastRadius={blastRadius} isLoading={blastLoading} repoFullName={repoFullName} headSha={headSha} />;
 }
 
-export function OverviewTab({ prBody, prId }: OverviewTabProps) {
+export function OverviewTab({ prBody, prId, repoFullName, headSha }: OverviewTabProps) {
   const t = useTranslations("prReview");
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -52,7 +54,7 @@ export function OverviewTab({ prBody, prId }: OverviewTabProps) {
         {prId && <IntentCard prId={prId} />}
         {prId && (
           <BlastRadiusErrorBoundary>
-            <BlastRadiusSection prId={prId} />
+            <BlastRadiusSection prId={prId} repoFullName={repoFullName} headSha={headSha} />
           </BlastRadiusErrorBoundary>
         )}
       </div>

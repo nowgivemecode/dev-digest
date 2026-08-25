@@ -13,9 +13,11 @@ import { BlastGraphLightbox } from "./BlastGraphLightbox";
 interface BlastRadiusCardProps {
   blastRadius: BlastRadiusResult | undefined;
   isLoading: boolean;
+  repoFullName?: string | null;
+  headSha?: string | null;
 }
 
-export function BlastRadiusCard({ blastRadius, isLoading }: BlastRadiusCardProps) {
+export function BlastRadiusCard({ blastRadius, isLoading, repoFullName, headSha }: BlastRadiusCardProps) {
   const t = useTranslations("prReview");
   const [graphOpen, setGraphOpen] = useState(false);
 
@@ -102,7 +104,7 @@ export function BlastRadiusCard({ blastRadius, isLoading }: BlastRadiusCardProps
         degraded={blastRadius.degraded ?? false}
       />
 
-      <SymbolList rows={symbolRows} />
+      <SymbolList rows={symbolRows} repoFullName={repoFullName ?? null} headSha={headSha ?? null} />
 
       <PriorPrsAccordion priorPrs={blastRadius.priorPrs} />
 
