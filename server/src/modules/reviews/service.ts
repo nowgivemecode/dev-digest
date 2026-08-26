@@ -10,7 +10,7 @@ import { reviewToDto } from './helpers.js';
 
 // Re-export DTO types + converters for backward-compatible imports from
 // './service.js' (these previously lived here; logic now in ./helpers.ts).
-export { findingRowToDto, reviewToDto } from './helpers.js';
+export { findingRowToDto, reviewToDto, taskLine } from './helpers.js';
 export type { ReviewDto, ReviewDtoFinding } from './helpers.js';
 
 /**
