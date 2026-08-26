@@ -52,9 +52,15 @@ export class RepoService {
     const { repoId, owner, name, url } = payload;
     const token = await this.container.secrets.get(GITHUB_TOKEN_SECRET);
     const cloneUrl = token ? withGitHubToken(url, token) : url;
-    const { path } = await this.container.git.clone({ owner, name }, cloneUrl, {
-      depth: CLONE_DEPTH,
-    });
+    let path: string;
+    try {
+      ({ path } = await this.container.git.clone({ owner, name }, cloneUrl, {
+        depth: CLONE_DEPTH,
+      }));
+    } catch (err) {
+      this.container.log.error({ err, repoId, owner, name }, 'clone job failed — repo not cloned');
+      return;
+    }
     await this.repo.updateClonePath(repoId, path);
 
     // T2.2 — kick off the indexer in the background. ENQUEUE (not call) so the
