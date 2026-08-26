@@ -274,3 +274,34 @@ export const AgentVersion = z.object({
   created_at: z.string(),
 });
 export type AgentVersion = z.infer<typeof AgentVersion>;
+
+// ---- Blast Radius ----
+export const BlastRadiusResult = z.object({
+  changedSymbols: z.array(z.object({
+    name: z.string(),
+    kind: z.string(),
+    file: z.string(),
+  })),
+  callers: z.array(z.object({
+    symbol: z.string(),
+    file: z.string(),
+    line: z.number(),
+    viaSymbol: z.string().optional(),
+    rank: z.number().optional(),
+  })),
+  impactedEndpoints: z.array(z.string()),
+  factsByFile: z.record(z.object({
+    endpoints: z.array(z.string()),
+    crons: z.array(z.string()),
+  })).optional(),
+  priorPrs: z.array(z.object({
+    id: z.string(),
+    number: z.number(),
+    title: z.string(),
+    openedAt: z.string().nullable(),
+    status: z.string(),
+  })).optional(),
+  degraded: z.boolean().optional(),
+  reason: z.string().optional(),
+});
+export type BlastRadiusResult = z.infer<typeof BlastRadiusResult>;

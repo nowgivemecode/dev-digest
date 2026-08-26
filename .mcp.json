@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "devdigest": {
+      "command": "npx",
+      "args": ["tsx", "mcp-server/src/index.ts"],
+      "env": {
+        "MCP_TOOL_TIMEOUT": "150000"
+      }
+    }
+  }
+}

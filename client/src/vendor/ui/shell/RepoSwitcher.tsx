@@ -66,6 +66,26 @@ export function RepoSwitcher({ ctx }: { ctx: ShellContext }) {
               {active ? `${active.default_branch ?? "main"} · ${active.syncedLabel ?? "not synced"}` : "Add a repo to begin"}
             </div>
           </div>
+          {ctx.onRefresh && (
+            <button
+              type="button"
+              title="Resync repo index"
+              onClick={(e) => { e.stopPropagation(); ctx.onRefresh?.(); }}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: 4,
+                borderRadius: 4,
+                color: "var(--text-muted)",
+                display: "flex",
+                alignItems: "center",
+                flexShrink: 0,
+              }}
+            >
+              <Icon.RefreshCw size={13} />
+            </button>
+          )}
           <Icon.ChevronsUpDown size={14} style={{ color: "var(--text-muted)" }} />
         </div>
       }
