@@ -80,8 +80,9 @@ export function reviewToDto(
  * the whole diff and never withhold a security/correctness finding.
  */
 export function taskLine(pull: PullRow): string {
+  const prLabel = `PR #${pull.number}`;
   return (
-    `Review pull request #${pull.number} "${pull.title}" by ${pull.author}. ` +
+    `Review pull request ${prLabel} "${pull.title}" by ${pull.author}. ` +
     `Report only the distinct, high-value findings you can defend, each citing an exact ` +
     `file and line range that appears in the diff. There is no target or maximum count, ` +
     `and zero findings is a valid result — do not pad or repeat to reach a number. ` +
