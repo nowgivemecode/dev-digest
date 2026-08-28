@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Card, SectionLabel, Button, Skeleton } from "@devdigest/ui";
 import { useBrief, useRecomputeBrief } from "@/lib/hooks/brief";
@@ -49,16 +50,13 @@ export function PrBriefCard({ prId, headSha }: PrBriefCardProps) {
   const t = useTranslations("prReview");
   const brief = useBrief(prId, headSha);
   const recompute = useRecomputeBrief(prId);
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  async function handleCopyFocus(item: string, index: number) {
-    try {
-      await navigator.clipboard.writeText(item);
-      setCopiedIndex(index);
-      setTimeout(() => setCopiedIndex(null), 1500);
-    } catch {
-      // clipboard not available — silently ignore
-    }
+  function handleFocusClick() {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", "diff");
+    router.push(`?${params.toString()}`);
   }
 
   const recomputeButton = (
@@ -224,33 +222,23 @@ export function PrBriefCard({ prId, headSha }: PrBriefCardProps) {
                   <li key={i}>
                     <button
                       type="button"
-                      onClick={() => handleCopyFocus(item, i)}
+                      onClick={handleFocusClick}
                       style={{
                         background: "none",
                         border: "none",
                         cursor: "pointer",
                         padding: "3px 0",
                         fontSize: 13,
-                        color: "var(--text-secondary)",
+                        color: "var(--link, #1a73e8)",
                         textAlign: "left",
                         width: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 6,
+                        fontFamily: "monospace",
+                        textDecoration: "underline",
+                        textUnderlineOffset: 2,
                       }}
-                      title={t("brief.copyFocusTitle")}
+                      title={t("brief.goToFilesTitle")}
                     >
-                      <span style={{ flex: 1 }}>{item}</span>
-                      <span
-                        style={{
-                          fontSize: 11,
-                          color: copiedIndex === i ? "var(--ok, #2e7d32)" : "var(--text-muted)",
-                          flexShrink: 0,
-                          transition: "color 0.15s",
-                        }}
-                      >
-                        {copiedIndex === i ? t("brief.copied") : t("brief.copy")}
-                      </span>
+                      {item}
                     </button>
                   </li>
                 ))}

@@ -133,8 +133,6 @@
     "reviewFocusLabel": "Review focus",
     "error": "Could not load the PR brief.",
     "tryAgain": "Try again",
-    "copy": "Copy",
-    "copied": "Copied!",
-    "copyFocusTitle": "Click to copy this focus item"
+    "goToFilesTitle": "Click to open Files Changed tab"
   }
 }
