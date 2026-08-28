@@ -1,6 +1,6 @@
 {
-  "id": "738dfce6-6324-4391-b2f4-41331e0847aa",
-  "prevId": "43296349-3fa6-4ef6-90ad-549092e4526c",
+  "id": "49630646-e72c-4faa-81bd-4c39f57da04e",
+  "prevId": "2a13542a-6b9f-4c29-980f-cdf122829a12",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1490,6 +1490,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
@@ -2600,6 +2607,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "cost_usd": {
+          "name": "cost_usd",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
         "status": {
           "name": "status",
           "type": "text",
@@ -2642,6 +2655,34 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false
+        },
+        "cost": {
+          "name": "cost",
+          "type": "numeric(12, 8)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": null
+        },
+        "findings_critical": {
+          "name": "findings_critical",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": null
+        },
+        "findings_warning": {
+          "name": "findings_warning",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": null
+        },
+        "findings_suggestion": {
+          "name": "findings_suggestion",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": null
         }
       },
       "indexes": {},
@@ -3434,5 +3475,5 @@
     "schemas": {},
     "tables": {}
   },
-  "prevSnapshot": "43296349-3fa6-4ef6-90ad-549092e4526c"
+  "prevSnapshot": "2a13542a-6b9f-4c29-980f-cdf122829a12"
 }
