@@ -19,7 +19,7 @@ Overview tab as `PrBriefCard`.
 
 ## Affected modules & contracts
 
-- `server/src/db/schema/reviews.ts` — `prBrief` table: add `head_sha TEXT NOT NULL` column + unique index on `(pr_id, head_sha)`; drop existing single-column PK and replace with composite unique constraint.
+- `server/src/db/schema/reviews.ts` — `prBrief` table: add `id UUID PK`, `head_sha TEXT NOT NULL` column + unique index on `(pr_id, head_sha)`; keep `pr_id` as a regular column (not PK).
 - `server/src/db/migrations/` — one new migration file for the schema change.
 - `server/src/modules/brief/` — new module: `routes.ts`, `service.ts`, `repository.ts`, `classifier.ts`, `constants.ts`.
 - `server/src/modules/index.ts` — register the new `brief` module.
@@ -44,16 +44,16 @@ Overview tab as `PrBriefCard`.
 
 ### Phase 1 — Contracts & schema (foundation; all parallel-safe)
 
-- **T1 — Shared contract: `Brief`, `Risk`, `BriefRecord`**
-  - **Action:** Create `server/src/vendor/shared/contracts/pr-brief.ts` with Zod schemas matching the spec's `Brief`, `Risk`, `BriefRecord` interfaces. `risk_level` enum includes `'critical'` (note: existing `RiskSeverity` in `brief.ts` is `high|medium|low` — the new schema adds `'critical'`). Export from `server/src/vendor/shared/index.ts` via `export * from './contracts/pr-brief.js'`.
+- **T1 — Shared contract: `PrBrief`, `PrBriefRisk`, `PrBriefRecord`**
+  - **Action:** Create `server/src/vendor/shared/contracts/pr-brief.ts` with Zod schemas matching the spec's `Brief`, `Risk`, `BriefRecord` interfaces. Export names use `PrBrief*` prefix to avoid barrel collision with existing `Risk` and `Brief*` exports from `brief.ts`. Concretely: `PrBriefRiskSchema` (individual risk item), `PrBriefSchema` (the full brief), `PrBriefRecordSchema` (brief + cache metadata). Export type aliases `PrBrief`, `PrBriefRisk`, `PrBriefRecord`. Add `export * from './contracts/pr-brief.js'` to `server/src/vendor/shared/index.ts`. Mirror the new file to `client/src/vendor/shared/contracts/pr-brief.ts` (and its barrel `client/src/vendor/shared/index.ts`) to keep vendor copies in sync.
   - **Module:** server (shared)
   - **Type:** backend
   - **Skills to use:** zod, typescript-expert
-  - **Owned paths:** `server/src/vendor/shared/contracts/pr-brief.ts`, `server/src/vendor/shared/index.ts`
+  - **Owned paths:** `server/src/vendor/shared/contracts/pr-brief.ts`, `server/src/vendor/shared/index.ts`, `client/src/vendor/shared/contracts/pr-brief.ts`, `client/src/vendor/shared/index.ts`
   - **Depends-on:** none
   - **Risk:** low
-  - **Known gotchas:** Existing `brief.ts` already exports `Risk` — name will conflict on the barrel. The new schema must be named distinctly (e.g. `BriefRisk`, `PrBriefRecord`) OR placed in the same file. Preferred approach: add the new types to the NEW file with distinct export names (`BriefRisk`, `PrBrief` already in use in brief.ts, so use `RiskBrief`, `BriefRecord`, and `BriefSummary` — OR simply append to the existing `brief.ts`). Decision: **append to existing `server/src/vendor/shared/contracts/brief.ts`** (no new barrel entry needed; existing `export *` covers it). Update `Owned paths` accordingly.
-  - **Acceptance:** `cd server && pnpm exec tsc --noEmit` passes. New types `Brief`, `BriefRecord`, `BriefRisk` importable from `@devdigest/shared` in a test file.
+  - **Known gotchas:** Existing `brief.ts` already exports `Risk` — using `PrBrief*` prefix entirely avoids barrel collision. Do NOT append to existing `brief.ts`; create a new file. Check `server/src/vendor/shared/index.ts` for any existing `export * from './contracts/pr-brief.js'` before adding.
+  - **Acceptance:** `cd server && pnpm exec tsc --noEmit` passes. Types `PrBrief`, `PrBriefRecord`, `PrBriefRisk` are importable from `@devdigest/shared` in a test file. No duplicate export errors from barrel.
   - **Covers:** AC-01, AC-04, AC-06, AC-07
 
 - **T2 — DB schema: add `head_sha` to `pr_brief`**
@@ -108,9 +108,9 @@ Overview tab as `PrBriefCard`.
 
 - **T6 — `BriefService`: orchestration layer**
   - **Action:** Create `server/src/modules/brief/service.ts`. Class `BriefService(container, logger?)`. Methods:
-    - `getOrCompute(workspaceId, prId): Promise<BriefRecord>` — check cache via `BriefRepository.getBrief(prId, pull.headSha)`, return if hit; else `compute()`.
-    - `recompute(workspaceId, prId): Promise<BriefRecord>` — always `compute()`.
-    - `private compute(workspaceId, prId): Promise<BriefRecord>` — (1) load PR via `reviewRepo.getPull`; 404 if missing (AC-12). (2) Load intent via `IntentService.getOrCompute` (ERR-01). (3) Load blast via `container.repoIntel.getBlastRadius(repoId, filePaths)`; empty arrays on degraded (ERR-02). (4) Load PR files (no patch) via `reviewRepo.getPrFiles`. (5) Resolve linked issue via GitHub client best-effort (ERR-03). (6) Resolve feature model `risk_brief` via `resolveFeatureModel`. (7) Build prompt + call LLM via `classifier.ts`. (8) On LLM error throw 502 `brief_llm_error` (ERR-04). (9) Upsert via `BriefRepository.upsertBrief`. (10) Return `BriefRecord`.
+    - `getOrCompute(workspaceId, prId): Promise<PrBriefRecord>` — (1) load PR via `reviewRepo.getPull`; 404 if missing (AC-12). (2) Snapshot `headSha = pull.headSha`. (3) Check cache via `BriefRepository.getBrief(prId, headSha)` — return if hit. (4) Else call `this.computeWithPull(workspaceId, pull, headSha)`.
+    - `recompute(workspaceId, prId): Promise<PrBriefRecord>` — (1) load PR; 404 if missing. (2) Snapshot headSha. (3) Always call `this.computeWithPull(workspaceId, pull, headSha)`.
+    - `private computeWithPull(workspaceId, pull, headSha): Promise<PrBriefRecord>` — receives the already-loaded PR + its headSha so cache key is consistent with the inputs. Steps: (1) Load intent via `IntentService.getOrCompute` (ERR-01). (2) Load blast via `container.repoIntel.getBlastRadius(repoId, filePaths)`; empty arrays on degraded (ERR-02). (3) Load PR files (no patch) via `reviewRepo.getPrFiles`. (4) Resolve linked issue via GitHub client best-effort (ERR-03). (5) Resolve feature model `risk_brief` via `resolveFeatureModel`. (6) Build prompt + call LLM via `classifier.ts`. (7) On LLM error throw 502 `brief_llm_error` (ERR-04). (8) Upsert via `BriefRepository.upsertBrief(prId, headSha, brief)` — uses the SAME headSha snapshotted before any async work. (9) Return `PrBriefRecord`.
   - **Module:** server
   - **Type:** backend
   - **Skills to use:** onion-architecture, fastify-best-practices, typescript-expert
@@ -148,7 +148,7 @@ Overview tab as `PrBriefCard`.
 ### Phase 3 — Client (parallel-safe with each other; depends on T7 being deployed or types available)
 
 - **T9 — TanStack Query hooks: `useBrief`, `useRecomputeBrief`**
-  - **Action:** Create `client/src/lib/hooks/brief.ts`. `useBrief(prId)` — calls `api.post<BriefRecord>(\`/pulls/\${prId}/brief\`)` via `useQuery` with `queryKey: ['brief', prId]`. `useRecomputeBrief(prId)` — `useMutation` calling `api.post<BriefRecord>(\`/pulls/\${prId}/brief/recompute\`)`, `onSuccess` updates `['brief', prId]` cache. Pattern mirrors `client/src/lib/hooks/intent.ts` exactly. Import `BriefRecord` from `@devdigest/shared` (client vendor copy).
+  - **Action:** Create `client/src/lib/hooks/brief.ts`. `useBrief(prId, headSha)` — accepts `headSha` as a second parameter (passed from the PR detail page that already has the pull object); calls `api.post<PrBriefRecord>(\`/pulls/\${prId}/brief\`)` via `useQuery` with `queryKey: ['brief', prId, headSha]`. When headSha changes (PR updated), TanStack Query treats it as a new key and refetches automatically. `useRecomputeBrief(prId)` — `useMutation` calling `api.post<PrBriefRecord>(\`/pulls/\${prId}/brief/recompute\`)`, `onSuccess` calls `queryClient.invalidateQueries({ queryKey: ['brief', prId] })` (prefix invalidation covers any SHA). Pattern mirrors `client/src/lib/hooks/intent.ts` exactly. Import `PrBriefRecord` from `@devdigest/shared` (client vendor copy).
   - **Module:** client
   - **Type:** ui
   - **Skills to use:** react-best-practices, next-best-practices, typescript-expert
@@ -156,14 +156,14 @@ Overview tab as `PrBriefCard`.
   - **Depends-on:** T1 (contract types available)
   - **Risk:** low
   - **Known gotchas:** `useBrief` uses `useQuery` with a `queryFn` that calls `api.post` (not `api.get`) — TanStack Query queryFn can call any async function; the method is POST per spec (compute-if-absent is POST, not GET).
-  - **Acceptance:** Unit test `client/src/lib/hooks/brief.test.ts` passes: mock `fetch`, assert `useBrief` fires POST to `/pulls/<id>/brief`; assert `useRecomputeBrief` mutation fires POST to `/pulls/<id>/brief/recompute` and updates cache. `cd client && pnpm test` green.
+  - **Acceptance:** Unit test `client/src/lib/hooks/brief.test.ts` passes: mock `fetch`, assert `useBrief('id', 'sha-a')` fires POST to `/pulls/id/brief` with queryKey `['brief', 'id', 'sha-a']`; assert changing headSha to `'sha-b'` causes a new fetch; assert `useRecomputeBrief` mutation fires POST to recompute and invalidates `['brief', 'id']` prefix. `cd client && pnpm test` green.
   - **Covers:** AC-01, AC-02, AC-03
 
 - **T10 — `PrBriefCard` component + i18n keys**
-  - **Action:** Create `client/src/app/repos/[repoId]/pulls/[number]/_components/OverviewTab/PrBriefCard.tsx`. It is a `"use client"` component. Behaviour:
-    - On mount: call `useBrief(prId)` (triggers POST compute-if-absent).
+  - **Action:** Create `client/src/app/repos/[repoId]/pulls/[number]/_components/OverviewTab/PrBriefCard.tsx`. It is a `"use client"` component. Props: `{ prId: string; headSha: string }`. Behaviour:
+    - On mount: call `useBrief(prId, headSha)` (triggers POST compute-if-absent; query key includes headSha so stale cache is never served after a PR update).
     - Loading state: render 3 `<Skeleton>` rows (AC-11).
-    - Error state: inline error message + "Try again" button that calls `recompute.mutate()` (ERR-06).
+    - Error state: inline error message + "Try again" button that calls `brief.refetch()` (re-triggers the compute-if-absent POST, does NOT use the rate-limited recompute endpoint — ERR-06).
     - Loaded state:
       - Risk level badge: coloured `<span>` or `<Badge>` — green/yellow/orange/red for low/medium/high/critical (AC-09). Use CSS custom properties (`--ok`, `--warn`, `--error`, `--critical`) or inline hex.
       - `what` and `why` as short text paragraphs.
@@ -178,11 +178,11 @@ Overview tab as `PrBriefCard`.
   - **Depends-on:** T9
   - **Risk:** low
   - **Known gotchas:** `navigator.clipboard.writeText` requires HTTPS or `localhost` — fine for dev but could fail in iframe-embedded envs. Wrap in `try/catch`. The `"critical"` colour token may not exist in the design system; use `var(--error)` or `#d32f2f` as a fallback. Check `client/src/vendor/ui/` for existing Badge/colour tokens.
-  - **Acceptance:** Unit test `PrBriefCard.test.tsx` (React Testing Library): (a) renders skeleton while loading, (b) renders risk badge with correct colour class/style for each `risk_level`, (c) clicking a `review_focus` item calls `navigator.clipboard.writeText`, (d) error state shows "Try again" button. `cd client && pnpm test` green.
+  - **Acceptance:** Unit test `PrBriefCard.test.tsx` (React Testing Library): (a) renders skeleton while loading, (b) renders risk badge with correct colour class/style for each `risk_level`, (c) clicking a `review_focus` item calls `navigator.clipboard.writeText`, (d) error state shows "Try again" button that calls `brief.refetch()` (not the recompute mutation). `cd client && pnpm test` green.
   - **Covers:** AC-09, AC-10, AC-11 (ERR-06)
 
 - **T11 — Mount `PrBriefCard` in `OverviewTab`**
-  - **Action:** Edit `client/src/app/repos/[repoId]/pulls/[number]/_components/OverviewTab/OverviewTab.tsx`: add `import { PrBriefCard } from './PrBriefCard'`; render `{prId && <PrBriefCard prId={prId} />}` above `IntentCard` (brief → intent → description, top to bottom).
+  - **Action:** Edit `client/src/app/repos/[repoId]/pulls/[number]/_components/OverviewTab/OverviewTab.tsx`: add `import { PrBriefCard } from './PrBriefCard'`; render `{prId && headSha && <PrBriefCard prId={prId} headSha={headSha} />}` above `IntentCard` (brief → intent → description, top to bottom). `headSha` is already available from the pull object in the parent page.
   - **Module:** client
   - **Type:** ui
   - **Skills to use:** react-best-practices, frontend-architecture
