@@ -1,6 +1,6 @@
 {
-  "id": "738dfce6-6324-4391-b2f4-41331e0847aa",
-  "prevId": "43296349-3fa6-4ef6-90ad-549092e4526c",
+  "id": "71881b30-6667-422d-9ef1-092902a3b035",
+  "prevId": "b576adbf-0131-42f2-94ff-6f93e88e74cd",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -819,10 +819,23 @@
       "name": "pr_brief",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
         "pr_id": {
           "name": "pr_id",
           "type": "uuid",
-          "primaryKey": true,
+          "primaryKey": false,
+          "notNull": true
+        },
+        "head_sha": {
+          "name": "head_sha",
+          "type": "text",
+          "primaryKey": false,
           "notNull": true
         },
         "json": {
@@ -830,9 +843,38 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "pr_brief_pr_sha_uq": {
+          "name": "pr_brief_pr_sha_uq",
+          "columns": [
+            {
+              "expression": "pr_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "head_sha",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "pr_brief_pr_id_pull_requests_id_fk": {
           "name": "pr_brief_pr_id_pull_requests_id_fk",
@@ -1141,6 +1183,13 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false
+        },
+        "threat_level": {
+          "name": "threat_level",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'unknown'"
         },
         "created_at": {
           "name": "created_at",
@@ -1490,6 +1539,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
@@ -2600,6 +2656,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "cost_usd": {
+          "name": "cost_usd",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
         "status": {
           "name": "status",
           "type": "text",
@@ -2639,6 +2701,30 @@
         },
         "blockers": {
           "name": "blockers",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cost": {
+          "name": "cost",
+          "type": "numeric(12, 8)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "findings_critical": {
+          "name": "findings_critical",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "findings_warning": {
+          "name": "findings_warning",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "findings_suggestion": {
+          "name": "findings_suggestion",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -3434,5 +3520,5 @@
     "schemas": {},
     "tables": {}
   },
-  "prevSnapshot": "43296349-3fa6-4ef6-90ad-549092e4526c"
+  "prevSnapshot": "b576adbf-0131-42f2-94ff-6f93e88e74cd"
 }

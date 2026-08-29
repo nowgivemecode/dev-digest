@@ -8,7 +8,8 @@ trigger rules ("Use proactively when…").
 | Agent | Model | Role | Writes code? |
 |-------|-------|------|--------------|
 | [`researcher`](./researcher.md) | sonnet | Read-only research (project + internet), strict structured output | No |
-| [`planner`](./planner.md) | opus | Read-only architect — produces a structured Development Plan | No (only the plan file) |
+| [`spec-creator`](./spec-creator.md) | opus | Clarifies requirements → writes feature spec to `specs/` | No (only spec file) |
+| [`implementation-planner`](./implementation-planner.md) | sonnet | Turns approved spec into phased Development Plan; every task refs an AC-ID | No (only plan file) |
 | [`implementer`](./implementer.md) | sonnet | Implements ONE task from a plan (backend or UI), self-verifies | Yes |
 | [`test-writer`](./test-writer.md) | sonnet | Writes unit + integration tests (backend + reviewer-core), self-verifies | Yes |
 | [`architecture-reviewer`](./architecture-reviewer.md) | opus | Read-only structural/architecture review of a diff or file set | No |
@@ -19,10 +20,13 @@ trigger rules ("Use proactively when…").
 
 ```
 you / main session
-   └─ planner (opus, read-only) → docs/plans/<feature>.md
-         (phased tasks with Type · Skills · Owned paths · Depends-on · Acceptance)
-         └─ N× implementer (sonnet, parallel) — one task each, inside its Owned paths
-               └─ pr-self-review (existing skill) — final gate before push
+   └─ spec-creator (opus, read-only) → specs/<feature>.md
+         (goals, non-goals, EARS acceptance criteria, provenance)
+         └─ implementation-planner (sonnet, read-only) → docs/plans/<feature>.md
+               (phased tasks with Type · Skills · Owned paths · Depends-on · AC-ID refs)
+               └─ run-plan skill → N× implementer (sonnet, parallel)
+                     └─ architecture-reviewer + plan-verifier (parallel, read-only)
+                           └─ pr-self-review (skill) — final gate before push
 ```
 
 The pipeline mirrors Claude Code's recommended **Explore → Plan → Implement → Commit** loop: the
