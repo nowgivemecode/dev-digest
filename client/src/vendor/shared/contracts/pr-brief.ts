@@ -23,6 +23,7 @@ export type PrBriefRisk = z.infer<typeof PrBriefRiskSchema>;
 
 // ---- Full brief ----
 export const PrBriefSchema = z.object({
+  tldr: z.string(),
   what: z.string(),
   why: z.string(),
   risk_level: PrBriefSeverity,
@@ -34,7 +35,7 @@ export type PrBriefData = z.infer<typeof PrBriefSchema>;
 
 // ---- Brief + cache metadata ----
 export const PrBriefRecordSchema = PrBriefSchema.extend({
-  pr_id: z.number().int(),
+  pr_id: z.string(),
   head_sha: z.string(),
   computed_at: z.string(),
 });

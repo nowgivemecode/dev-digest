@@ -99,6 +99,22 @@ export function PrBriefCard({ prId, headSha }: PrBriefCardProps) {
 
       {!brief.isLoading && !brief.isError && brief.data && (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {/* TL;DR */}
+          {brief.data.tldr && (
+            <p
+              style={{
+                fontSize: 14,
+                fontStyle: "italic",
+                color: "var(--text-secondary)",
+                margin: 0,
+                paddingBottom: 8,
+                borderBottom: "1px solid var(--border)",
+              }}
+            >
+              {brief.data.tldr}
+            </p>
+          )}
+
           {/* Risk level badge */}
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span
