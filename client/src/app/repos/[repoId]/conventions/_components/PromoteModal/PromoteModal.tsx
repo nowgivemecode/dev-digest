@@ -4,7 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { Modal, Button } from "@devdigest/ui";
 import type { ConventionCandidate } from "@devdigest/shared";
-import { usePromoteConventions } from "@/lib/hooks/conventions";
+import { useCreateSkillFromConventions as usePromoteConventions } from "@/lib/hooks/conventions";
 
 interface Props {
   repoId: string;
@@ -39,7 +39,7 @@ function buildSkillBody(repoName: string, accepted: ConventionCandidate[]): stri
 
 export function PromoteModal({ repoId, repoUrl, repoName, accepted, onClose }: Props) {
   const router = useRouter();
-  const promote = usePromoteConventions(repoId);
+  const promote = usePromoteConventions();
 
   const shortName = repoName.includes("/") ? repoName.split("/")[1] : repoName;
   const [name, setName] = React.useState(`${shortName}-conventions`);
@@ -51,8 +51,8 @@ export function PromoteModal({ repoId, repoUrl, repoName, accepted, onClose }: P
   const [enabled, setEnabled] = React.useState(true);
 
   const handleSave = async () => {
-    const result = await promote.mutateAsync({ repoUrl, name, description });
-    router.push(`/skills/${result.skill_id}`);
+    const result = await promote.mutateAsync({ repoId, name, description });
+    router.push(`/skills/${result.id}`);
     onClose();
   };
 
