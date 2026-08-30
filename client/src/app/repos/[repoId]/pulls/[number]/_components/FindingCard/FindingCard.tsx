@@ -139,8 +139,8 @@ export function FindingCard({
           <div style={s.titleRow}>
             <span style={s.title(muted, dismissed)}>{f.title}</span>
             <CategoryTag category={f.category as Category} />
-            {accepted && <span style={s.acceptedTag}>{t("finding.accepted")}</span>}
-            {dismissed && <span style={s.dismissedTag}>{t("finding.dismissed")}</span>}
+            {accepted && <span style={s.acceptedTag}>✓ {t("finding.accepted")}</span>}
+            {dismissed && <span style={s.dismissedTag}>✕ {t("finding.dismissed")}</span>}
           </div>
           <div style={s.metaRow}>
             <MonoLink href={fileHref}>
@@ -187,6 +187,17 @@ export function FindingCard({
             >
               {t("finding.dismiss")}
             </Button>
+            {muted && (
+              <Button
+                kind="ghost"
+                size="sm"
+                icon="RotateCcw"
+                disabled={pending}
+                onClick={() => onAction?.("reset")}
+              >
+                {t("finding.reset")}
+              </Button>
+            )}
             {showEvalButton && (
               <EvalCaseButton f={f} agentId={agentId!} prDiff={prDiff} pending={pending} />
             )}

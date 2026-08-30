@@ -15,7 +15,7 @@ import { ReviewService } from './service.js';
  *   GET    /pulls/:id/reviews                          → persisted reviews + findings for a PR
  *   POST   /findings/:id/(accept|dismiss)              → finding actions
  */
-const FINDING_ACTIONS = ['accept', 'dismiss'] as const;
+const FINDING_ACTIONS = ['accept', 'dismiss', 'reset'] as const;
 export default async function reviewsRoutes(appBase: FastifyInstance) {
   const app = appBase.withTypeProvider<ZodTypeProvider>();
   const { container } = app;

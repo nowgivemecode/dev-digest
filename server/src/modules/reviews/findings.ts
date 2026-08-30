@@ -28,6 +28,10 @@ export async function actOnFinding(
       const row = await repo.setFindingDismissed(findingId, new Date());
       return { finding: findingRowToDto(row!) };
     }
+    case 'reset': {
+      const row = await repo.setFindingAccepted(findingId, null);
+      return { finding: findingRowToDto(row!) };
+    }
     default:
       throw new AppError('invalid_action', `Action '${action}' is not available in the starter`, 400);
   }
