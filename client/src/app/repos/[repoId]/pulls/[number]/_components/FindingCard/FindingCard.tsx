@@ -41,8 +41,10 @@ function EvalCaseButton({
 }) {
   const accepted = !!f.accepted_at;
   const createEvalCase = useCreateEvalCase(agentId);
+  const [created, setCreated] = React.useState(false);
 
   function handleClick() {
+    if (created) return;
     createEvalCase.mutate(
       {
         owner_kind: "agent",
@@ -62,10 +64,21 @@ function EvalCaseButton({
         },
       },
       {
-        onSuccess: () => notify.success("Eval case created"),
+        onSuccess: () => {
+          setCreated(true);
+          notify.success("Eval case created");
+        },
         onError: (err) =>
           notify.error(err instanceof Error ? err.message : "Failed to create eval case"),
       },
+    );
+  }
+
+  if (created) {
+    return (
+      <span style={{ fontSize: 12, color: "var(--ok, #0a0)", display: "flex", alignItems: "center", gap: 4 }}>
+        ✓ Added to evals
+      </span>
     );
   }
 
