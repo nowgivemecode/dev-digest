@@ -25,4 +25,5 @@ export * from './contracts/eval-ci';
 export * from './contracts/observability';
 export * from './contracts/productionize';
 export * from './contracts/pr-brief';
+export * from './contracts/project-context';
 export * from './adapters';

@@ -148,5 +148,16 @@
     "bodyLabel": "Skill body (Markdown)",
     "bodyHint": "Saving a changed body creates a new immutable version.",
     "version": "v{version}"
+  },
+  "context": {
+    "title": "Context",
+    "attachedCount": "{count, plural, one {# attached} other {# attached}}",
+    "inheritanceNote": "Any agent using this skill inherits these documents.",
+    "filterPlaceholder": "Filter documents…",
+    "noMatch": "No documents match.",
+    "reorderHint": "Drag to reorder, or use ↑↓ arrow keys when focused",
+    "rowAriaAttached": "Attached document: {name}",
+    "rowAriaDetached": "Available document: {name}",
+    "serializesAs": "Serializes as"
   }
 }

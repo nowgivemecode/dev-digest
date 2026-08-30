@@ -146,6 +146,7 @@ export const Skill = z.object({
   version: z.number().int(),
   evidence_files: z.array(z.string()).nullish(),
   threat_level: SkillThreatLevel.optional(),
+  attached_doc_paths: z.array(z.string()).default([]),
 });
 export type Skill = z.infer<typeof Skill>;
 
@@ -233,6 +234,7 @@ export const Agent = z.object({
   // agent's review prompt. Default on; gated again by the global flag.
   repo_intel: z.boolean().default(true),
   skill_count: z.number().int().optional(),
+  attached_doc_paths: z.array(z.string()).default([]),
 });
 export type Agent = z.infer<typeof Agent>;
 

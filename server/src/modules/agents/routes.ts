@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import { CiFailOn, Provider, ReviewStrategy } from '@devdigest/shared';
+import { CiFailOn, Provider, ReviewStrategy, SetAttachedDocsBody } from '@devdigest/shared';
 import { getContext } from '../_shared/context.js';
 import { IdParams } from '../_shared/schemas.js';
 import { NotFoundError } from '../../platform/errors.js';
@@ -18,16 +18,17 @@ const VersionParams = z.object({
 
 /**
  * A2 — agents module (owner A2).
- *   GET    /agents                  → list (workspace-scoped)
- *   GET    /agents/:id              → one agent
- *   POST   /agents                  → create
- *   PUT    /agents/:id              → update / toggle enabled (versions config)
- *   GET    /agents/:id/versions     → config history (newest first)
+ *   GET    /agents                       → list (workspace-scoped)
+ *   GET    /agents/:id                   → one agent
+ *   POST   /agents                       → create
+ *   PUT    /agents/:id                   → update / toggle enabled (versions config)
+ *   PUT    /agents/:id/attached-docs     → set attached doc paths (no version bump)
+ *   GET    /agents/:id/versions          → config history (newest first)
  *   GET    /agents/:id/versions/:version → one config snapshot
- *   GET    /agents/:id/skills       → linked skills (ordered)
- *   POST   /agents/:id/skills       → set/reorder linked skills OR link one
- *   GET    /agents/:id/models       → dynamic model list for the agent's provider
- *   GET    /providers/:id/models    → dynamic model list for a provider (editor)
+ *   GET    /agents/:id/skills            → linked skills (ordered)
+ *   POST   /agents/:id/skills            → set/reorder linked skills OR link one
+ *   GET    /agents/:id/models            → dynamic model list for the agent's provider
+ *   GET    /providers/:id/models         → dynamic model list for a provider (editor)
  */
 
 const CreateAgentBody = z.object({
@@ -112,6 +113,17 @@ export default async function agentsRoutes(appBase: FastifyInstance) {
     async (req) => {
       const { workspaceId } = await getContext(app.container, req);
       const agent = await service.update(workspaceId, req.params.id, req.body);
+      if (!agent) throw new NotFoundError('Agent not found');
+      return agent;
+    },
+  );
+
+  app.put(
+    '/agents/:id/attached-docs',
+    { schema: { params: IdParams, body: SetAttachedDocsBody } },
+    async (req) => {
+      const { workspaceId } = await getContext(app.container, req);
+      const agent = await service.setAttachedDocs(workspaceId, req.params.id, req.body.paths);
       if (!agent) throw new NotFoundError('Agent not found');
       return agent;
     },

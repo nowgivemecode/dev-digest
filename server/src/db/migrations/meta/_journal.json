@@ -134,6 +134,13 @@
       "when": 1787952927509,
       "tag": "0018_pr_brief_head_sha",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1788044372013,
+      "tag": "0019_shallow_katie_power",
+      "breakpoints": true
     }
   ]
 }
