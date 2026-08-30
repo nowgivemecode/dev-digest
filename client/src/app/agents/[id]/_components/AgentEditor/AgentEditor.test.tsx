@@ -11,6 +11,16 @@ vi.mock("../../../../../lib/hooks/agents", () => ({
   useProviderModels: () => ({ data: [{ id: "gpt-4.1", provider: "openai" }] }),
 }));
 
+vi.mock("../../../../../lib/hooks/evals", () => ({
+  useEvalCases: () => ({ data: [], isLoading: false }),
+  useEvalRuns: () => ({ data: [], isLoading: false }),
+  useRunAllEvals: () => ({ mutate: vi.fn(), isPending: false }),
+  useRunSingleCase: () => ({ mutate: vi.fn(), isPending: false }),
+  useCreateEvalCase: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useUpdateEvalCase: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useDeleteEvalCase: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
 import { AgentEditor } from "./AgentEditor";
 
 afterEach(cleanup);
@@ -28,6 +38,7 @@ const AGENT: Agent = {
   repo_intel: true,
   enabled: true,
   version: 1,
+  attached_doc_paths: [],
 };
 
 function renderWithIntl(ui: React.ReactElement) {
@@ -44,5 +55,15 @@ describe("A2 Agent Editor (smoke)", () => {
     expect(screen.getByText("Config")).toBeInTheDocument();
     expect(screen.getByText("Configuration")).toBeInTheDocument();
     expect(screen.getByText("Save agent")).toBeInTheDocument();
+  });
+
+  it("renders EvalsTab when tab is evals", () => {
+    renderWithIntl(<AgentEditor agent={AGENT} tab="evals" onTab={() => {}} />);
+    // The Evals tab label is visible in the tabs bar
+    expect(screen.getByText("Evals")).toBeInTheDocument();
+    // The empty-state message is shown since cases = []
+    expect(
+      screen.getByText(/No eval cases yet/),
+    ).toBeInTheDocument();
   });
 });

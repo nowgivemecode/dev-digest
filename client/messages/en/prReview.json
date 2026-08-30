@@ -5,6 +5,7 @@
     "suggestedFix": "Suggested fix",
     "accept": "Accept",
     "dismiss": "Dismiss",
+    "reset": "Undo",
     "learn": "Learn",
     "replyToAuthor": "Reply to author",
     "replyPlaceholder": "Reply to the author about this finding…",
@@ -121,5 +122,18 @@
     "inScopeLabel": "In scope",
     "outOfScopeLabel": "Out of scope",
     "error": "Could not load intent. Click Recompute to try again."
+  },
+  "brief": {
+    "sectionLabel": "PR Brief",
+    "recompute": "Recompute",
+    "recomputeAriaLabel": "Recompute PR brief",
+    "riskLevelLabel": "Risk level",
+    "whatLabel": "What",
+    "whyLabel": "Why",
+    "risksLabel": "Risks",
+    "reviewFocusLabel": "Review focus",
+    "error": "Could not load the PR brief.",
+    "tryAgain": "Try again",
+    "goToFilesTitle": "Click to open Files Changed tab"
   }
 }

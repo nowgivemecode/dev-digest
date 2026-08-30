@@ -30,6 +30,7 @@ export function ReviewRunAccordion({
   defaultOpen = false,
   repoFullName,
   headSha,
+  prDiff,
   targetRunId = null,
   targetNonce = 0,
   targetFindingId = null,
@@ -39,6 +40,7 @@ export function ReviewRunAccordion({
   defaultOpen?: boolean;
   repoFullName?: string | null;
   headSha?: string | null;
+  prDiff?: string;
   /** When this matches review.run_id, the accordion opens and scrolls into view
    *  (driven from the Timeline: clicking an agent name navigates here). */
   targetRunId?: string | null;
@@ -171,6 +173,8 @@ export function ReviewRunAccordion({
             prId={prId}
             repoFullName={repoFullName}
             headSha={headSha}
+            agentId={review.agent_id}
+            prDiff={prDiff}
             targetFindingId={targetFindingId}
           />
         </div>

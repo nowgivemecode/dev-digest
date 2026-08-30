@@ -4,13 +4,13 @@ import React from "react";
 import { useParams } from "next/navigation";
 import { Button, EmptyState, Skeleton } from "@devdigest/ui";
 import { AppShell } from "@/components/app-shell";
-import { useActiveRepo } from "@/lib/repo-context";
+import { useActiveRepo } from "@/lib/contexts";
 import {
   useConventions,
   useExtractConventions,
   useAcceptConvention,
   useRejectConvention,
-  useUpdateConvention,
+  useUpdateConventionRule as useUpdateConvention,
 } from "@/lib/hooks/conventions";
 import { ConventionCard } from "./_components/ConventionCard/ConventionCard";
 import { PromoteModal } from "./_components/PromoteModal/PromoteModal";
@@ -27,10 +27,10 @@ export default function ConventionsPage() {
   const shortName = repoName.includes("/") ? repoName.split("/")[1] : repoName;
 
   const { data: candidates, isLoading } = useConventions(repoId);
-  const extract = useExtractConventions(repoId);
-  const accept = useAcceptConvention(repoId);
-  const reject = useRejectConvention(repoId);
-  const update = useUpdateConvention(repoId);
+  const extract = useExtractConventions();
+  const accept = useAcceptConvention();
+  const reject = useRejectConvention();
+  const update = useUpdateConvention();
 
   const [showPromote, setShowPromote] = React.useState(false);
 
@@ -38,7 +38,7 @@ export default function ConventionsPage() {
   const allAccepted = candidates && candidates.length > 0 && accepted.length === candidates.length;
 
   const handleDeselectAll = () => {
-    accepted.forEach((c) => reject.mutate(c.id));
+    accepted.forEach((c) => reject.mutate({ repoId, id: c.id }));
   };
 
   return (
@@ -62,7 +62,7 @@ export default function ConventionsPage() {
             kind="secondary"
             icon="RefreshCw"
             loading={extract.isPending}
-            onClick={() => extract.mutate()}
+            onClick={() => extract.mutate(repoId)}
           >
             Re-scan
           </Button>
@@ -122,9 +122,9 @@ export default function ConventionsPage() {
                 key={c.id}
                 candidate={c}
                 repoUrl={repoUrl}
-                onAccept={() => accept.mutate(c.id)}
-                onReject={() => reject.mutate(c.id)}
-                onEdit={(rule) => update.mutate({ cid: c.id, patch: { rule } })}
+                onAccept={() => accept.mutate({ repoId, id: c.id })}
+                onReject={() => reject.mutate({ repoId, id: c.id })}
+                onEdit={(rule) => update.mutate({ repoId, id: c.id, rule })}
               />
             ))}
           </div>

@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { pgTable, uuid, text, integer, jsonb, timestamp, doublePrecision } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, integer, jsonb, timestamp, doublePrecision, uniqueIndex } from 'drizzle-orm/pg-core';
 import { now } from './_shared';
 import { workspaces } from './core';
 import { pullRequests } from './pulls';
@@ -55,8 +55,13 @@ export const prIntent = pgTable('pr_intent', {
 });
 
 export const prBrief = pgTable('pr_brief', {
+  id: uuid('id').primaryKey().defaultRandom(),
   prId: uuid('pr_id')
-    .primaryKey()
+    .notNull()
     .references(() => pullRequests.id, { onDelete: 'cascade' }),
+  headSha: text('head_sha').notNull(),
   json: jsonb('json').notNull(),
-});
+  computedAt: now(),
+}, (t) => [
+  uniqueIndex('pr_brief_pr_sha_uq').on(t.prId, t.headSha),
+]);

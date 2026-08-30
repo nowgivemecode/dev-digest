@@ -80,6 +80,15 @@ export default function PRDetailPage() {
   const lethalTrifecta = allFindings.filter((f) => f.kind === "lethal_trifecta");
   const findingsCount = allFindings.length;
 
+  const prDiff = React.useMemo(
+    () =>
+      (pr?.files ?? [])
+        .filter((f) => f.patch)
+        .map((f) => `--- a/${f.path}\n+++ b/${f.path}\n${f.patch}`)
+        .join("\n"),
+    [pr?.files],
+  );
+
   const repoName = activeRepo?.full_name ?? repoId;
   // The real "owner/repo" (null until the repo is loaded) — used to build
   // github.com deep-links for the header and finding file references.
@@ -138,7 +147,7 @@ export default function PRDetailPage() {
       />
 
       <div style={{ padding: "24px 32px 44px", display: "flex", flexDirection: "column", gap: 24, maxWidth: 1080, margin: "0 auto" }}>
-        {tab === "overview" && <OverviewTab prBody={pr.body} prId={prId} />}
+        {tab === "overview" && <OverviewTab prBody={pr.body} prId={prId} headSha={pr.head_sha ?? undefined} />}
 
         {tab === "findings" && (
           <FindingsTab
@@ -152,6 +161,7 @@ export default function PRDetailPage() {
             prCommits={pr.commits}
             repoFullName={repoFullName}
             headSha={pr.head_sha}
+            prDiff={prDiff}
             focusFindingId={focusFindingId}
             onFocusFinding={(id) => setParam("finding", id)}
             cancelMutation={cancel}
