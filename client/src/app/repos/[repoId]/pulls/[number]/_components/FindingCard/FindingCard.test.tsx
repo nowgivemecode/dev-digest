@@ -7,6 +7,11 @@ import { FindingCard } from "./FindingCard";
 
 afterEach(cleanup);
 
+// Mock eval hooks so FindingCard renders without a QueryClient / network.
+vi.mock("../../../../../../../lib/hooks/evals", () => ({
+  useCreateEvalCase: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
 const FINDING: FindingRecord = {
   id: "f1",
   severity: "CRITICAL",
@@ -56,5 +61,47 @@ describe("FindingCard (smoke, both themes)", () => {
     expect(onAction).toHaveBeenCalledWith("accept");
     fireEvent.click(screen.getByText("Dismiss"));
     expect(onAction).toHaveBeenCalledWith("dismiss");
+  });
+});
+
+describe("FindingCard — Turn into eval case button", () => {
+  const ACCEPTED_FINDING: FindingRecord = {
+    ...FINDING,
+    accepted_at: "2026-08-30T10:00:00Z",
+    dismissed_at: null,
+  };
+
+  const DISMISSED_FINDING: FindingRecord = {
+    ...FINDING,
+    accepted_at: null,
+    dismissed_at: "2026-08-30T10:00:00Z",
+  };
+
+  it("shows 'Turn into eval case' button when verdict is accepted and agentId is provided", () => {
+    renderWithIntl(
+      <FindingCard f={ACCEPTED_FINDING} defaultExpanded agentId="ag1" />,
+    );
+    expect(screen.getByText("Turn into eval case")).toBeInTheDocument();
+  });
+
+  it("shows 'Turn into eval case' button when verdict is dismissed and agentId is provided", () => {
+    renderWithIntl(
+      <FindingCard f={DISMISSED_FINDING} defaultExpanded agentId="ag1" />,
+    );
+    expect(screen.getByText("Turn into eval case")).toBeInTheDocument();
+  });
+
+  it("does not show 'Turn into eval case' button when verdict is pending (no accepted_at/dismissed_at)", () => {
+    renderWithIntl(
+      <FindingCard f={FINDING} defaultExpanded agentId="ag1" />,
+    );
+    expect(screen.queryByText("Turn into eval case")).not.toBeInTheDocument();
+  });
+
+  it("does not show 'Turn into eval case' button when agentId is not provided", () => {
+    renderWithIntl(
+      <FindingCard f={ACCEPTED_FINDING} defaultExpanded />,
+    );
+    expect(screen.queryByText("Turn into eval case")).not.toBeInTheDocument();
   });
 });
