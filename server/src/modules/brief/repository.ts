@@ -10,7 +10,7 @@ function toRecord(row: typeof t.prBrief.$inferSelect): PrBriefRecord {
   const data = row.json as PrBriefData;
   return {
     ...data,
-    pr_id: row.prId as unknown as number, // stored as UUID string; cast to satisfy contract
+    pr_id: row.prId,
     head_sha: row.headSha,
     computed_at: row.computedAt.toISOString(),
   };

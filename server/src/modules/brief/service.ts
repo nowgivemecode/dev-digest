@@ -90,9 +90,9 @@ export class BriefService {
     const intentService = new IntentService(this.container, this.logger);
     const intentRecord = await intentService.getOrCompute(workspaceId, prId);
     const intent = {
-      intent: (intentRecord as { intent?: string }).intent ?? '',
-      inScope: (intentRecord as { inScope?: string[] }).inScope ?? [],
-      outOfScope: (intentRecord as { outOfScope?: string[] }).outOfScope ?? [],
+      intent: intentRecord.intent ?? '',
+      inScope: (intentRecord as unknown as { in_scope?: string[] }).in_scope ?? [],
+      outOfScope: (intentRecord as unknown as { out_of_scope?: string[] }).out_of_scope ?? [],
     };
 
     // Step 2 (ERR-02): Load blast radius — empty arrays if degraded/missing.

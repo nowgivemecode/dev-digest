@@ -34,7 +34,7 @@ export type PrBriefData = z.infer<typeof PrBriefSchema>;
 
 // ---- Brief + cache metadata ----
 export const PrBriefRecordSchema = PrBriefSchema.extend({
-  pr_id: z.number().int(),
+  pr_id: z.string(),
   head_sha: z.string(),
   computed_at: z.string(),
 });
