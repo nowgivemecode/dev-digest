@@ -57,7 +57,7 @@ export function useDeleteEvalCase(agentId: string) {
 export function useRunAllEvals(agentId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: () => api.post<EvalRunResult[]>(`/agents/${agentId}/eval-runs`),
+    mutationFn: () => api.post<EvalRunResult[]>(`/agents/${agentId}/eval-runs`, {}),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["eval-cases", agentId] });
       qc.invalidateQueries({ queryKey: ["eval-runs", agentId] });
