@@ -38,6 +38,7 @@ export function RunsTable({
       <thead>
         <tr style={{ borderBottom: "1px solid var(--border)" }}>
           {selectable && <th style={{ width: 32, padding: "8px" }} />}
+          <th style={{ textAlign: "left", padding: "8px 12px", color: "var(--text-muted)", fontWeight: 600 }}>CASE</th>
           <th style={{ textAlign: "left", padding: "8px 12px", color: "var(--text-muted)", fontWeight: 600 }}>RAN AT</th>
           <th style={{ textAlign: "left", padding: "8px 12px", color: "var(--text-muted)", fontWeight: 600 }}>RECALL</th>
           <th style={{ textAlign: "left", padding: "8px 12px", color: "var(--text-muted)", fontWeight: 600 }}>PRECISION</th>
@@ -64,6 +65,7 @@ export function RunsTable({
                   />
                 </td>
               )}
+              <td style={{ padding: "10px 12px", fontWeight: 500 }}>{run.case_name ?? "—"}</td>
               <td style={{ padding: "10px 12px", color: "var(--text-muted)" }}>{date}</td>
               <td style={{ padding: "10px 12px" }}><MetricBar value={run.recall} /></td>
               <td style={{ padding: "10px 12px" }}><MetricBar value={run.precision} /></td>
